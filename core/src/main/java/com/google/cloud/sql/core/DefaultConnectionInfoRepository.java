@@ -33,13 +33,9 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.KeyPair;
-import java.security.KeyStore;
+import java.security.*;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStore.PrivateKeyEntry;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -327,7 +323,11 @@ class DefaultConnectionInfoRepository implements ConnectionInfoRepository {
       KeyStore trustedKeyStore = KeyStore.getInstance(KeyStore.getDefaultType());
       trustedKeyStore.load(null, null);
       trustedKeyStore.setCertificateEntry("instance", instanceMetadata.getInstanceCaCertificate());
-      TrustManagerFactory tmf = TrustManagerFactory.getInstance("X.509");
+      TrustManagerFactory tmf =
+          TrustManagerFactory.getInstance(
+              TrustManagerFactory.getDefaultAlgorithm(), // jdk default PKIX
+              SSLContext.getDefault().getProvider()      // jdk default SunJSSE
+              );
       tmf.init(trustedKeyStore);
       SSLContext sslContext;
 
